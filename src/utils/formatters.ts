@@ -66,9 +66,15 @@ export function statusBadgeClass(status: TravelOrderStatus): string {
   }
 }
 
+const FORMULA_PREFIX_RE = /^[\s\u0000-\u001F]*[=+\-@]/;
+
 function escapeCsvCell(value: unknown): string {
   const str = value == null ? '' : String(value);
-  return `"${str.replace(/"/g, '""')}"`;
+  const safe =
+    FORMULA_PREFIX_RE.test(str) || str.startsWith('\t') || str.startsWith('\r')
+      ? `'${str}`
+      : str;
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 export function downloadFile(filename: string, content: string, mimeType: string): void {

@@ -219,6 +219,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
           <form onSubmit={handleLookup} className="lookup-bar">
             <input
               type="text"
+              maxLength={250}
               placeholder="Enter applicant name or paste tracking link..."
               value={tokenInput}
               onChange={(e) => setTokenInput(e.target.value)}
@@ -419,6 +420,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Name</label>
                           <input
                             required
+                            maxLength={150}
                             value={editForm.applicant_name}
                             onChange={(e) =>
                               setEditForm({ ...editForm, applicant_name: e.target.value })
@@ -429,6 +431,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Position</label>
                           <input
                             required
+                            maxLength={150}
                             value={editForm.position}
                             onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
                           />
@@ -437,6 +440,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Destination</label>
                           <input
                             required
+                            maxLength={250}
                             value={editForm.destination}
                             onChange={(e) =>
                               setEditForm({ ...editForm, destination: e.target.value })
@@ -471,6 +475,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <textarea
                             rows={2}
                             required
+                            maxLength={1000}
                             value={editForm.purpose}
                             onChange={(e) => setEditForm({ ...editForm, purpose: e.target.value })}
                           />
@@ -479,6 +484,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Transportation</label>
                           <input
                             required
+                            maxLength={150}
                             value={editForm.transportation}
                             onChange={(e) =>
                               setEditForm({ ...editForm, transportation: e.target.value })
@@ -489,6 +495,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Accommodation Type</label>
                           <input
                             required
+                            maxLength={150}
                             value={editForm.accommodation_type}
                             onChange={(e) =>
                               setEditForm({ ...editForm, accommodation_type: e.target.value })
@@ -499,6 +506,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Persons to be Contacted</label>
                           <input
                             required
+                            maxLength={250}
                             value={editForm.persons_contacted}
                             onChange={(e) =>
                               setEditForm({ ...editForm, persons_contacted: e.target.value })
@@ -509,6 +517,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <label>Department Head</label>
                           <input
                             required
+                            maxLength={150}
                             value={editForm.department_head}
                             onChange={(e) =>
                               setEditForm({ ...editForm, department_head: e.target.value })

@@ -769,6 +769,7 @@ export function AdminDashboard({
                 <textarea
                   id="admin-remarks"
                   rows={2}
+                  maxLength={1000}
                   placeholder="Enter verification notes, correction instructions, or rejection reason..."
                   value={actionRemarks}
                   onChange={(e) => setActionRemarks(e.target.value)}

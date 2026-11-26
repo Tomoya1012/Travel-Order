@@ -228,6 +228,17 @@ begin
     raise exception 'All required fields must be completed.';
   end if;
 
+  if length(trim(p_applicant_name)) > 150
+     or length(trim(p_position)) > 150
+     or length(trim(p_destination)) > 250
+     or length(trim(p_purpose)) > 1000
+     or length(trim(p_transportation)) > 150
+     or length(trim(p_accommodation_type)) > 150
+     or length(trim(p_persons_contacted)) > 250
+     or length(trim(p_department_head)) > 150 then
+    raise exception 'One or more fields exceed the maximum allowed length.';
+  end if;
+
   if p_departure_date is null or p_return_date is null then
     raise exception 'Departure and return dates are required.';
   end if;
@@ -363,12 +374,15 @@ security definer
 set search_path = public, extensions
 as $$
 declare
-  v_query text := trim(coalesce(p_name, ''));
+  v_query text := left(trim(coalesce(p_name, '')), 120);
+  v_escaped text;
   v_results jsonb;
 begin
-  if length(v_query) < 2 then
+  if length(trim(translate(v_query, '%_\', ''))) < 2 then
     return '[]'::jsonb;
   end if;
+
+  v_escaped := replace(replace(replace(v_query, '\', '\\'), '%', '\%'), '_', '\_');
 
   select coalesce(
     jsonb_agg(
@@ -394,7 +408,7 @@ begin
   from (
     select *
     from public.travel_orders
-    where applicant_name ilike '%' || v_query || '%'
+    where applicant_name ilike '%' || v_escaped || '%' escape '\'
     order by submission_date desc
     limit 20
   ) t;
@@ -426,6 +440,40 @@ as $$
 declare
   v_row public.travel_orders%rowtype;
 begin
+  if length(trim(coalesce(p_token, ''))) < 16 then
+    raise exception 'Invalid tracking token.';
+  end if;
+
+  if p_signing_authority not in ('MAYOR', 'VICE_MAYOR') then
+    raise exception 'Invalid signing authority.';
+  end if;
+
+  if length(trim(coalesce(p_applicant_name, ''))) = 0
+     or length(trim(coalesce(p_position, ''))) = 0
+     or length(trim(coalesce(p_destination, ''))) = 0
+     or length(trim(coalesce(p_purpose, ''))) = 0
+     or length(trim(coalesce(p_transportation, ''))) = 0
+     or length(trim(coalesce(p_accommodation_type, ''))) = 0
+     or length(trim(coalesce(p_persons_contacted, ''))) = 0
+     or length(trim(coalesce(p_department_head, ''))) = 0 then
+    raise exception 'All required fields must be completed.';
+  end if;
+
+  if length(trim(p_applicant_name)) > 150
+     or length(trim(p_position)) > 150
+     or length(trim(p_destination)) > 250
+     or length(trim(p_purpose)) > 1000
+     or length(trim(p_transportation)) > 150
+     or length(trim(p_accommodation_type)) > 150
+     or length(trim(p_persons_contacted)) > 250
+     or length(trim(p_department_head)) > 150 then
+    raise exception 'One or more fields exceed the maximum allowed length.';
+  end if;
+
+  if p_departure_date is null or p_return_date is null then
+    raise exception 'Departure and return dates are required.';
+  end if;
+
   select * into v_row
   from public.travel_orders
   where tracking_token = trim(coalesce(p_token, ''))

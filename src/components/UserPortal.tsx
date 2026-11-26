@@ -281,6 +281,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="applicant_name"
               type="text"
               required
+              maxLength={150}
               placeholder="e.g., Juan Dela Cruz"
               value={form.applicant_name}
               onChange={(e) => updateField('applicant_name', e.target.value)}
@@ -295,6 +296,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="position"
               type="text"
               required
+              maxLength={150}
               placeholder="e.g., Administrative Officer II"
               value={form.position}
               onChange={(e) => updateField('position', e.target.value)}
@@ -309,6 +311,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="destination"
               type="text"
               required
+              maxLength={250}
               placeholder="e.g., Lingayen, Pangasinan / Civil Service Commission Field Office"
               value={form.destination}
               onChange={(e) => updateField('destination', e.target.value)}
@@ -350,6 +353,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="purpose"
               rows={3}
               required
+              maxLength={1000}
               placeholder="State the official purpose of your travel"
               value={form.purpose}
               onChange={(e) => updateField('purpose', e.target.value)}
@@ -364,6 +368,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="transportation"
               type="text"
               required
+              maxLength={150}
               placeholder="e.g., Official Vehicle / Public Utility Vehicle"
               value={form.transportation}
               onChange={(e) => updateField('transportation', e.target.value)}
@@ -378,6 +383,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="accommodation_type"
               type="text"
               required
+              maxLength={150}
               placeholder="e.g., None (Day Trip) / Hotel / Official Quarters"
               value={form.accommodation_type}
               onChange={(e) => updateField('accommodation_type', e.target.value)}
@@ -392,6 +398,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="persons_contacted"
               type="text"
               required
+              maxLength={250}
               placeholder="e.g., Regional Director / HR Personnel"
               value={form.persons_contacted}
               onChange={(e) => updateField('persons_contacted', e.target.value)}
@@ -406,6 +413,7 @@ export function UserPortal({ settings, onOpenTracking }: UserPortalProps) {
               id="department_head"
               type="text"
               required
+              maxLength={150}
               placeholder="Name of Department Head"
               value={form.department_head}
               onChange={(e) => updateField('department_head', e.target.value)}
