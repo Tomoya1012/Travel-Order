@@ -101,6 +101,11 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
     }
   };
 
+  const openSearchResult = (item: TravelOrderSearchResult) => {
+    window.history.pushState({}, '', `/track/${encodeURIComponent(item.tracking_token)}`);
+    void fetchOrder(item.tracking_token);
+  };
+
   useEffect(() => {
     if (initialToken) {
       setTokenInput(initialToken);
@@ -248,7 +253,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
               <p className="muted" style={{ marginBottom: '10px' }}>
                 Found <strong>{searchResults.length}</strong> matching applications. Select one to view details:
               </p>
-              <div className="table-scroll">
+              <div className="table-scroll search-results-desktop">
                 <table className="data-table">
                   <thead>
                     <tr>
@@ -279,14 +284,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <button
                             type="button"
                             className="btn btn-primary btn-sm"
-                            onClick={() => {
-                              window.history.pushState(
-                                {},
-                                '',
-                                `/track/${encodeURIComponent(item.tracking_token)}`
-                              );
-                              void fetchOrder(item.tracking_token);
-                            }}
+                            onClick={() => openSearchResult(item)}
                           >
                             View
                           </button>
@@ -295,6 +293,48 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="search-results-mobile" aria-label="Matching applications">
+                {searchResults.map((item) => (
+                  <article className="search-result-card" key={item.id}>
+                    <dl className="search-result-summary">
+                      <div>
+                        <dt>Reference #</dt>
+                        <dd className="mono">{item.reference_number}</dd>
+                      </div>
+                      <div>
+                        <dt>Applicant</dt>
+                        <dd>
+                          <strong>{item.applicant_name}</strong>
+                          <span className="muted-small">{item.position}</span>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Destination</dt>
+                        <dd>{item.destination}</dd>
+                      </div>
+                      <div>
+                        <dt>Travel Date</dt>
+                        <dd>{formatDateLong(item.departure_date)}</dd>
+                      </div>
+                      <div>
+                        <dt>Status</dt>
+                        <dd>
+                          <span className={statusBadgeClass(item.status)}>
+                            {formatStatusLabel(item.status)}
+                          </span>
+                        </dd>
+                      </div>
+                    </dl>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => openSearchResult(item)}
+                    >
+                      View Application
+                    </button>
+                  </article>
+                ))}
               </div>
             </div>
           )}

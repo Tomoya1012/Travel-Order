@@ -773,6 +773,10 @@ textarea:focus {
   overflow-x: auto;
 }
 
+.search-results-mobile {
+  display: none;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -1222,6 +1226,57 @@ textarea:focus {
   /* Table card */
   .table-card {
     padding: 12px;
+  }
+
+  /* Render name-search results as cards instead of a squeezed wide table. */
+  .search-results-desktop {
+    display: none;
+  }
+  .search-results-mobile {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .search-result-card {
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  .search-result-summary {
+    display: grid;
+    gap: 9px;
+    margin: 0;
+  }
+  .search-result-summary > div {
+    display: grid;
+    grid-template-columns: minmax(82px, 0.38fr) minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+  }
+  .search-result-summary dt {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .search-result-summary dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .search-result-summary dd .muted-small {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+  .search-result-card > .btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
   }
 
   /* Modal */

@@ -1,0 +1,1 @@
+Fix mobile table overflow in name search results
