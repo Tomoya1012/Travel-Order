@@ -665,23 +665,25 @@ begin
   end if;
 
   -- Lock settings row atomically to prevent duplicate Travel Order Numbers
+  -- Mayor and Vice Mayor share one synced Travel Order sequence
   select * into v_settings from public.app_settings where id = 1 for update;
 
+  v_seq := greatest(v_settings.mayor_next_seq, v_settings.vice_mayor_next_seq);
+
   if v_row.signing_authority = 'MAYOR' then
-    v_seq := v_settings.mayor_next_seq;
     v_sig_name := v_settings.mayor_name;
     v_sig_title := v_settings.mayor_title;
-    update public.app_settings
-    set mayor_next_seq = mayor_next_seq + 1, updated_at = now()
-    where id = 1;
   else
-    v_seq := v_settings.vice_mayor_next_seq;
     v_sig_name := v_settings.vice_mayor_name;
     v_sig_title := v_settings.vice_mayor_title;
-    update public.app_settings
-    set vice_mayor_next_seq = vice_mayor_next_seq + 1, updated_at = now()
-    where id = 1;
   end if;
+
+  update public.app_settings
+  set
+    mayor_next_seq = v_seq + 1,
+    vice_mayor_next_seq = v_seq + 1,
+    updated_at = now()
+  where id = 1;
 
   v_to_number := lpad(v_seq::text, 4, '0') || '-' || v_year;
 
@@ -851,7 +853,7 @@ begin
     vice_mayor_name = trim(p_vice_mayor_name),
     vice_mayor_title = trim(p_vice_mayor_title),
     mayor_next_seq = p_mayor_next_seq,
-    vice_mayor_next_seq = p_vice_mayor_next_seq,
+    vice_mayor_next_seq = p_mayor_next_seq,
     updated_at = now()
   where id = 1
   returning * into v_settings;

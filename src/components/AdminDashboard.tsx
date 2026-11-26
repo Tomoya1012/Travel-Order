@@ -600,43 +600,30 @@ export function AdminDashboard({
                       }
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="mayor_next_seq">Mayor Next Sequence Number</label>
+                  <div className="form-group form-span-2">
+                    <label htmlFor="mayor_next_seq">
+                      Next Travel Order Sequence Number (Synced for Mayor &amp; Vice Mayor)
+                    </label>
                     <input
                       id="mayor_next_seq"
                       type="number"
                       min={1}
                       required
-                      value={settingsForm.mayor_next_seq}
-                      onChange={(e) =>
+                      value={Math.max(settingsForm.mayor_next_seq, settingsForm.vice_mayor_next_seq)}
+                      onChange={(e) => {
+                        const nextSeq = Number(e.target.value);
                         setSettingsForm({
                           ...settingsForm,
-                          mayor_next_seq: Number(e.target.value),
-                        })
-                      }
+                          mayor_next_seq: nextSeq,
+                          vice_mayor_next_seq: nextSeq,
+                        });
+                      }}
                     />
                     <span className="field-hint">
-                      Next Mayor TO #: {String(settingsForm.mayor_next_seq).padStart(4, '0')}-
-                      {new Date().getFullYear()}
-                    </span>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="vice_mayor_next_seq">Vice Mayor Next Sequence Number</label>
-                    <input
-                      id="vice_mayor_next_seq"
-                      type="number"
-                      min={1}
-                      required
-                      value={settingsForm.vice_mayor_next_seq}
-                      onChange={(e) =>
-                        setSettingsForm({
-                          ...settingsForm,
-                          vice_mayor_next_seq: Number(e.target.value),
-                        })
-                      }
-                    />
-                    <span className="field-hint">
-                      Next Vice Mayor TO #: {String(settingsForm.vice_mayor_next_seq).padStart(4, '0')}
+                      Next TO # (Mayor or Vice Mayor):{' '}
+                      {String(
+                        Math.max(settingsForm.mayor_next_seq, settingsForm.vice_mayor_next_seq)
+                      ).padStart(4, '0')}
                       -{new Date().getFullYear()}
                     </span>
                   </div>
