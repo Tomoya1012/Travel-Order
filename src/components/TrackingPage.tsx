@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AlertCircle, ArrowLeft, Printer, RefreshCw, Search } from 'lucide-react';
 import { travelOrderService } from '../services/travelOrderService';
-import type { SigningAuthority, TrackedTravelOrder, TravelOrderInput } from '../types/travelOrder';
+import type {
+  SigningAuthority,
+  TrackedTravelOrder,
+  TravelOrderInput,
+  TravelOrderSearchResult,
+} from '../types/travelOrder';
 import {
   formatAuthorityLabel,
   formatDateLong,
@@ -14,6 +19,16 @@ import { PrintableTravelOrder } from './PrintableTravelOrder';
 interface TrackingPageProps {
   initialToken: string;
   onBackHome: () => void;
+}
+
+/** Returns true if input looks like a tracking URL or 16+ char hex token */
+function isTrackingTokenOrUrl(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!trimmed) return false;
+  if (trimmed.includes('://') || trimmed.startsWith('/') || trimmed.includes('?token=')) {
+    return true;
+  }
+  return /^[a-f0-9]{16,}$/i.test(trimmed);
 }
 
 /** Accepts a full URL like /track/abc123 or just the raw token abc123 */
@@ -37,6 +52,7 @@ function extractTrackingToken(raw: string): string {
 export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
   const [tokenInput, setTokenInput] = useState(initialToken);
   const [order, setOrder] = useState<TrackedTravelOrder | null>(null);
+  const [searchResults, setSearchResults] = useState<TravelOrderSearchResult[]>([]);
   const [loading, setLoading] = useState(Boolean(initialToken));
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +72,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
     setLoading(true);
     setError(null);
     setNotFound(false);
+    setSearchResults([]);
     try {
       const result = await travelOrderService.getByTrackingToken(clean);
       if (!result) {
@@ -92,13 +109,46 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialToken]);
 
-  const handleLookup = (e: FormEvent) => {
+  const handleLookup = async (e: FormEvent) => {
     e.preventDefault();
-    const clean = extractTrackingToken(tokenInput);
-    if (!clean) return;
-    setTokenInput(clean);
-    window.history.pushState({}, '', `/track/${encodeURIComponent(clean)}`);
-    void fetchOrder(clean);
+    const raw = tokenInput.trim();
+    if (!raw) return;
+
+    if (isTrackingTokenOrUrl(raw)) {
+      const clean = extractTrackingToken(raw);
+      if (!clean) return;
+      setTokenInput(clean);
+      window.history.pushState({}, '', `/track/${encodeURIComponent(clean)}`);
+      await fetchOrder(clean);
+      return;
+    }
+
+    if (raw.length < 2) {
+      setError('Please enter at least 2 characters to search by applicant name.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setNotFound(false);
+    setOrder(null);
+    setSearchResults([]);
+    try {
+      const matches = await travelOrderService.searchByName(raw);
+      if (matches.length === 0) {
+        setNotFound(true);
+      } else if (matches.length === 1) {
+        const only = matches[0];
+        window.history.pushState({}, '', `/track/${encodeURIComponent(only.tracking_token)}`);
+        await fetchOrder(only.tracking_token);
+      } else {
+        setSearchResults(matches);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to search applications.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrint = async () => {
@@ -163,19 +213,19 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
 
           <h2 className="section-title">Track Travel Order Application</h2>
           <p className="muted">
-            Enter your private tracking token or paste your saved private tracking link.
+            Search by applicant name, or paste your private tracking token / link.
           </p>
 
           <form onSubmit={handleLookup} className="lookup-bar">
             <input
               type="text"
-              placeholder="Paste your private tracking token or link..."
+              placeholder="Enter applicant name or paste tracking link..."
               value={tokenInput}
               onChange={(e) => setTokenInput(e.target.value)}
             />
             <button type="submit" className="btn btn-primary" disabled={loading}>
               <Search size={16} />
-              {loading ? 'Checking...' : 'Check Status'}
+              {loading ? 'Searching...' : 'Search / Track'}
             </button>
           </form>
 
@@ -188,7 +238,63 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
           {notFound && (
             <div className="alert alert-warning" role="status">
               <AlertCircle size={18} />
-              No application matched that private tracking link. Please check your link and try again.
+              No application matched that name or tracking link. Please check and try again.
+            </div>
+          )}
+
+          {searchResults.length > 1 && (
+            <div className="tracked-details">
+              <p className="muted" style={{ marginBottom: '10px' }}>
+                Found <strong>{searchResults.length}</strong> matching applications. Select one to view details:
+              </p>
+              <div className="table-wrapper">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Reference #</th>
+                      <th>Applicant</th>
+                      <th>Destination</th>
+                      <th>Travel Date</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((item) => (
+                      <tr key={item.id}>
+                        <td className="mono">{item.reference_number}</td>
+                        <td>
+                          <strong>{item.applicant_name}</strong>
+                          <div className="muted-small">{item.position}</div>
+                        </td>
+                        <td>{item.destination}</td>
+                        <td>{formatDateLong(item.departure_date)}</td>
+                        <td>
+                          <span className={statusBadgeClass(item.status)}>
+                            {formatStatusLabel(item.status)}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => {
+                              window.history.pushState(
+                                {},
+                                '',
+                                `/track/${encodeURIComponent(item.tracking_token)}`
+                              );
+                              void fetchOrder(item.tracking_token);
+                            }}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 

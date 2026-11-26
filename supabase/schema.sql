@@ -355,6 +355,54 @@ begin
 end;
 $$;
 
+-- B2. Public tracking search by applicant name
+create or replace function public.search_travel_orders_by_name(p_name text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_query text := trim(coalesce(p_name, ''));
+  v_results jsonb;
+begin
+  if length(v_query) < 2 then
+    return '[]'::jsonb;
+  end if;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', t.id,
+        'reference_number', t.reference_number,
+        'tracking_token', t.tracking_token,
+        'travel_order_number', case when t.status = 'APPROVED' then t.travel_order_number else null end,
+        'signing_authority', t.signing_authority,
+        'applicant_name', t.applicant_name,
+        'position', t.position,
+        'destination', t.destination,
+        'departure_date', t.departure_date,
+        'return_date', t.return_date,
+        'status', t.status,
+        'submission_date', t.submission_date
+      )
+      order by t.submission_date desc
+    ),
+    '[]'::jsonb
+  )
+  into v_results
+  from (
+    select *
+    from public.travel_orders
+    where applicant_name ilike '%' || v_query || '%'
+    order by submission_date desc
+    limit 20
+  ) t;
+
+  return v_results;
+end;
+$$;
+
 -- C. Applicant resubmit after CORRECTION_REQUESTED
 create or replace function public.resubmit_corrected_travel_order(
   p_token text,
@@ -838,6 +886,7 @@ grant select on public.audit_logs to authenticated;
 -- ============================================================================
 grant execute on function public.submit_travel_order(text,text,text,text,date,date,text,text,text,text,text) to anon, authenticated;
 grant execute on function public.get_travel_order_by_token(text) to anon, authenticated;
+grant execute on function public.search_travel_orders_by_name(text) to anon, authenticated;
 grant execute on function public.resubmit_corrected_travel_order(text,text,text,text,text,date,date,text,text,text,text,text) to anon, authenticated;
 grant execute on function public.record_travel_order_print(uuid,text) to anon, authenticated;
 

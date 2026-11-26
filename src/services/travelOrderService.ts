@@ -7,6 +7,7 @@ import type {
   SubmissionResult,
   TrackedTravelOrder,
   TravelOrderInput,
+  TravelOrderSearchResult,
 } from '../types/travelOrder';
 
 function requireClient() {
@@ -56,6 +57,15 @@ export const travelOrderService = {
     });
     if (error) throw new Error(error.message);
     return (data as TrackedTravelOrder | null) ?? null;
+  },
+
+  async searchByName(name: string): Promise<TravelOrderSearchResult[]> {
+    const client = requireClient();
+    const { data, error } = await client.rpc('search_travel_orders_by_name', {
+      p_name: name.trim(),
+    });
+    if (error) throw new Error(error.message);
+    return (Array.isArray(data) ? data : []) as TravelOrderSearchResult[];
   },
 
   async resubmitCorrected(token: string, input: TravelOrderInput): Promise<TrackedTravelOrder> {

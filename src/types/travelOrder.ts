@@ -42,6 +42,21 @@ export interface SubmissionResult {
   status: TravelOrderStatus;
 }
 
+export interface TravelOrderSearchResult {
+  id: string;
+  reference_number: string;
+  tracking_token: string;
+  travel_order_number: string | null;
+  signing_authority: SigningAuthority;
+  applicant_name: string;
+  position: string;
+  destination: string;
+  departure_date: string;
+  return_date: string;
+  status: TravelOrderStatus;
+  submission_date: string;
+}
+
 export interface TrackedTravelOrder {
   id: string;
   reference_number: string;
