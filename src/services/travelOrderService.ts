@@ -4,6 +4,7 @@ import type {
   AdminUser,
   AppSettings,
   AuditLog,
+  PublicApprovedTravelOrderPrint,
   SubmissionResult,
   TrackedTravelOrder,
   TravelOrderInput,
@@ -66,6 +67,19 @@ export const travelOrderService = {
     });
     if (error) throw new Error(error.message);
     return (Array.isArray(data) ? data : []) as TravelOrderSearchResult[];
+  },
+
+  async getApprovedTravelOrderForNamePrint(
+    referenceNumber: string,
+    applicantName: string
+  ): Promise<PublicApprovedTravelOrderPrint> {
+    const client = requireClient();
+    const { data, error } = await client.rpc('get_approved_travel_order_for_name_print', {
+      p_reference_number: referenceNumber.trim(),
+      p_applicant_name: applicantName.trim(),
+    });
+    if (error) throw new Error(error.message);
+    return data as PublicApprovedTravelOrderPrint;
   },
 
   async resubmitCorrected(token: string, input: TravelOrderInput): Promise<TrackedTravelOrder> {

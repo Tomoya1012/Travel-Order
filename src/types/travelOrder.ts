@@ -49,6 +49,25 @@ export interface TravelOrderSearchResult {
   submission_date: string;
 }
 
+export interface PublicApprovedTravelOrderPrint {
+  travel_order_number: string;
+  order_date: string;
+  signing_authority: SigningAuthority;
+  signatory_name: string;
+  signatory_title: string;
+  applicant_name: string;
+  position: string;
+  destination: string;
+  departure_date: string;
+  return_date: string;
+  purpose: string;
+  transportation: string;
+  accommodation_type: string;
+  persons_contacted: string;
+  department_head: string;
+  reference_number: string;
+}
+
 export interface TrackedTravelOrder {
   id: string;
   reference_number: string;

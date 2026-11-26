@@ -569,6 +569,87 @@ begin
 end;
 $$;
 
+-- D2. Public print access for approved name-search results.
+-- This intentionally exposes only official print fields for the exact applicant name/reference pair.
+create or replace function public.get_approved_travel_order_for_name_print(
+  p_reference_number text,
+  p_applicant_name text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_order public.travel_orders%rowtype;
+  v_settings public.app_settings%rowtype;
+begin
+  if length(trim(coalesce(p_reference_number, ''))) = 0
+     or length(trim(p_reference_number)) > 50 then
+    raise exception 'A valid application reference is required.';
+  end if;
+
+  if length(trim(coalesce(p_applicant_name, ''))) = 0
+     or length(trim(p_applicant_name)) > 150 then
+    raise exception 'A valid applicant name is required.';
+  end if;
+
+  select * into v_order
+  from public.travel_orders
+  where reference_number = trim(p_reference_number)
+    and lower(trim(applicant_name)) = lower(trim(p_applicant_name))
+    and status = 'APPROVED'
+  for update;
+
+  if not found then
+    raise exception 'Approved Travel Order not found for the provided name and reference.';
+  end if;
+
+  select * into v_settings from public.app_settings where id = 1;
+
+  update public.travel_orders
+  set
+    print_count = print_count + 1,
+    last_printed_at = now(),
+    updated_at = now()
+  where id = v_order.id;
+
+  insert into public.audit_logs (action, travel_order_id, actor_id, actor_label, description)
+  values (
+    'TRAVEL_ORDER_PRINTED',
+    v_order.id,
+    null,
+    v_order.applicant_name || ' (Name search)',
+    'Printed approved Travel Order #' || v_order.travel_order_number || ' from name search.'
+  );
+
+  return jsonb_build_object(
+    'travel_order_number', v_order.travel_order_number,
+    'order_date', coalesce(v_order.approval_date, v_order.submission_date),
+    'signing_authority', v_order.signing_authority,
+    'signatory_name', coalesce(
+      v_order.signatory_name_snapshot,
+      case when v_order.signing_authority = 'MAYOR' then v_settings.mayor_name else v_settings.vice_mayor_name end
+    ),
+    'signatory_title', coalesce(
+      v_order.signatory_title_snapshot,
+      case when v_order.signing_authority = 'MAYOR' then v_settings.mayor_title else v_settings.vice_mayor_title end
+    ),
+    'applicant_name', v_order.applicant_name,
+    'position', v_order.position,
+    'destination', v_order.destination,
+    'departure_date', v_order.departure_date,
+    'return_date', v_order.return_date,
+    'purpose', v_order.purpose,
+    'transportation', v_order.transportation,
+    'accommodation_type', v_order.accommodation_type,
+    'persons_contacted', v_order.persons_contacted,
+    'department_head', v_order.department_head,
+    'reference_number', v_order.reference_number
+  );
+end;
+$$;
+
 -- ============================================================================
 -- Admin-Only Workflow RPCs
 -- ============================================================================
@@ -936,6 +1017,7 @@ revoke execute on function public.get_travel_order_by_token(text) from public, a
 revoke execute on function public.search_travel_orders_by_name(text) from public, anon, authenticated;
 revoke execute on function public.resubmit_corrected_travel_order(text,text,text,text,text,date,date,text,text,text,text,text) from public, anon, authenticated;
 revoke execute on function public.record_travel_order_print(uuid,text) from public, anon, authenticated;
+revoke execute on function public.get_approved_travel_order_for_name_print(text,text) from public, anon, authenticated;
 revoke execute on function public.admin_start_review(uuid,text) from public, anon, authenticated;
 revoke execute on function public.admin_verify_order(uuid,text) from public, anon, authenticated;
 revoke execute on function public.admin_approve_order(uuid,text) from public, anon, authenticated;
@@ -949,6 +1031,7 @@ grant execute on function public.get_travel_order_by_token(text) to anon, authen
 grant execute on function public.search_travel_orders_by_name(text) to anon, authenticated;
 grant execute on function public.resubmit_corrected_travel_order(text,text,text,text,text,date,date,text,text,text,text,text) to anon, authenticated;
 grant execute on function public.record_travel_order_print(uuid,text) to anon, authenticated;
+grant execute on function public.get_approved_travel_order_for_name_print(text,text) to anon, authenticated;
 
 grant execute on function public.admin_start_review(uuid,text) to authenticated;
 grant execute on function public.admin_verify_order(uuid,text) to authenticated;

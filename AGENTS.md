@@ -12,7 +12,7 @@
 
 - Preserve applicant-name search. The public name-search RPC may return only a reference number, applicant name, status, and submission date. Never return a tracking token, database ID, or full travel details from name search.
 - A tracking token is a bearer credential. Do not put it in search results, logs, analytics, or public URLs other than the private tracking link intentionally issued to the applicant.
-- Full application details, correction resubmission, and applicant printing require the private tracking token. Keep the public name search as a limited reference/status lookup.
+- Full application details and correction resubmission require the private tracking token. Approved Travel Orders may be printed from name-search results through the narrow, audited print RPC, which returns only fields required for the official document.
 - Never put a Supabase `service_role` key or a deployment proxy credential in frontend code, tracked files, build output, or examples. Use ignored local environment files for local credentials; `.env.example` must contain placeholders only.
 - `SECURITY DEFINER` RPCs must use a fixed `search_path`, validate input, and enforce the caller's authorization internally. Explicitly revoke default `PUBLIC` execution and grant only the intended roles.
 - Keep direct table access protected by RLS. Admin mutations belong in guarded RPCs, and audit records are written by the database functions.
@@ -28,5 +28,5 @@
 
 ## Current handoff
 
-- Name search remains enabled but does not grant access to the private tracking flow. Users need their issued tracking link/token for full details and actions.
+- Name search remains enabled and can print approved Travel Orders without the private token; full details and correction requests still require the tracking link/token.
 - The current local mobile improvement renders name-search matches as compact cards below 640px; larger screens retain the table.

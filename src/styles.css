@@ -1273,10 +1273,9 @@ textarea:focus {
     display: block;
     overflow-wrap: anywhere;
   }
-  .search-result-card > .btn {
+  .search-result-summary .btn {
     width: 100%;
     justify-content: center;
-    margin-top: 12px;
   }
 
   /* Modal */

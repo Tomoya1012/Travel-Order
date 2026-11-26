@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AlertCircle, ArrowLeft, Printer, RefreshCw, Search } from 'lucide-react';
 import { travelOrderService } from '../services/travelOrderService';
 import type {
+  PublicApprovedTravelOrderPrint,
   SigningAuthority,
   TrackedTravelOrder,
   TravelOrderInput,
@@ -52,6 +53,7 @@ function extractTrackingToken(raw: string): string {
 export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
   const [tokenInput, setTokenInput] = useState(initialToken);
   const [order, setOrder] = useState<TrackedTravelOrder | null>(null);
+  const [namePrintOrder, setNamePrintOrder] = useState<PublicApprovedTravelOrderPrint | null>(null);
   const [searchResults, setSearchResults] = useState<TravelOrderSearchResult[]>([]);
   const [loading, setLoading] = useState(Boolean(initialToken));
   const [notFound, setNotFound] = useState(false);
@@ -163,6 +165,33 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
     }
   };
 
+  const handlePrintNameSearchResult = async (result: TravelOrderSearchResult) => {
+    if (result.status !== 'APPROVED' || printingRef.current) return;
+    printingRef.current = true;
+    setPrintingLabel(true);
+    setError(null);
+    try {
+      const printableOrder = await travelOrderService.getApprovedTravelOrderForNamePrint(
+        result.reference_number,
+        result.applicant_name
+      );
+      setNamePrintOrder(printableOrder);
+      window.setTimeout(() => {
+        try {
+          window.print();
+        } finally {
+          setNamePrintOrder(null);
+          setPrintingLabel(false);
+          printingRef.current = false;
+        }
+      }, 80);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to prepare the approved Travel Order.');
+      setPrintingLabel(false);
+      printingRef.current = false;
+    }
+  };
+
   const handleResubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!order || !editForm || resubmittingRef.current) return;
@@ -242,9 +271,8 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
           {searchResults.length > 0 && (
             <div className="tracked-details">
               <p className="muted" style={{ marginBottom: '10px' }}>
-                Found <strong>{searchResults.length}</strong> matching applications. Name search shows
-                reference and status only. Use your private tracking link to view details, submit corrections,
-                or print an approved Travel Order.
+                Found <strong>{searchResults.length}</strong> matching applications. Approved Travel Orders
+                can be printed here. Use your private tracking link to view full details or submit corrections.
               </p>
               <div className="table-scroll search-results-desktop">
                 <table className="data-table">
@@ -254,6 +282,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                       <th>Applicant</th>
                       <th>Submitted</th>
                       <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -266,6 +295,19 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           <span className={statusBadgeClass(item.status)}>
                             {formatStatusLabel(item.status)}
                           </span>
+                        </td>
+                        <td>
+                          {item.status === 'APPROVED' && (
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              onClick={() => void handlePrintNameSearchResult(item)}
+                              disabled={printingLabel}
+                            >
+                              <Printer size={15} />
+                              {printingLabel ? 'Preparing...' : 'Print'}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -298,6 +340,22 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                           </span>
                         </dd>
                       </div>
+                      {item.status === 'APPROVED' && (
+                        <div>
+                          <dt>Action</dt>
+                          <dd>
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              onClick={() => void handlePrintNameSearchResult(item)}
+                              disabled={printingLabel}
+                            >
+                              <Printer size={15} />
+                              {printingLabel ? 'Preparing...' : 'Print Travel Order'}
+                            </button>
+                          </dd>
+                        </div>
+                      )}
                     </dl>
                   </article>
                 ))}
@@ -598,6 +656,28 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
             personsContacted={order.persons_contacted}
             departmentHead={order.department_head}
             referenceNumber={order.reference_number}
+          />
+        </section>
+      )}
+      {namePrintOrder && (
+        <section className="print-only-container">
+          <PrintableTravelOrder
+            travelOrderNumber={namePrintOrder.travel_order_number}
+            orderDate={namePrintOrder.order_date}
+            signingAuthority={namePrintOrder.signing_authority}
+            signatoryName={namePrintOrder.signatory_name}
+            signatoryTitle={namePrintOrder.signatory_title}
+            applicantName={namePrintOrder.applicant_name}
+            position={namePrintOrder.position}
+            destination={namePrintOrder.destination}
+            departureDate={namePrintOrder.departure_date}
+            returnDate={namePrintOrder.return_date}
+            purpose={namePrintOrder.purpose}
+            transportation={namePrintOrder.transportation}
+            accommodationType={namePrintOrder.accommodation_type}
+            personsContacted={namePrintOrder.persons_contacted}
+            departmentHead={namePrintOrder.department_head}
+            referenceNumber={namePrintOrder.reference_number}
           />
         </section>
       )}
