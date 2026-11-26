@@ -102,6 +102,11 @@ export default function App() {
               alt="Municipality of Anda Seal"
               className="brand-logo"
             />
+            <img
+              src="/assets/logo-hrmo.png"
+              alt="Human Resource Management Office of Anda logo"
+              className="brand-logo"
+            />
             <div className="brand-text">
               <span className="brand-title">Municipality of Anda, Pangasinan</span>
               <span className="brand-sub">Online Travel Order Management System</span>
