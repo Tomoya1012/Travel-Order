@@ -23,7 +23,7 @@
 
 - Install dependencies with `npm install` and run the development server with `npm run dev`.
 - Run the production type-check and bundle with `npm run build` (`tsc && vite build`). There is no test script currently defined in `package.json`.
-- Netlify and Vercel serve the Vite `dist` output. `deploy.bat` requires `NETLIFY_MCP_PROXY_PATH` from the caller's environment; never write its value into the file.
+- Netlify and Vercel serve the Vite `dist` output. `deploy.bat` uses the authenticated Netlify CLI to trigger a build from the GitHub-connected production branch; it does not upload uncommitted local files.
 - Update this guide when architecture, security boundaries, deployment behavior, or key product constraints change so future coding sessions have a reliable handoff.
 
 ## Current handoff
