@@ -822,6 +822,18 @@ end;
 $$;
 
 -- ============================================================================
+-- Table Grants (RLS enforces row-level access on all tables)
+-- ============================================================================
+grant usage on schema public to anon, authenticated;
+
+grant select on public.app_settings to anon, authenticated;
+grant update on public.app_settings to authenticated;
+
+grant select on public.admin_users to authenticated;
+grant select on public.travel_orders to authenticated;
+grant select on public.audit_logs to authenticated;
+
+-- ============================================================================
 -- Function Execute Grants
 -- ============================================================================
 grant execute on function public.submit_travel_order(text,text,text,text,date,date,text,text,text,text,text) to anon, authenticated;
