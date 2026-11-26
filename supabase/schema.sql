@@ -366,7 +366,8 @@ begin
 end;
 $$;
 
--- B2. Public tracking search by applicant name
+-- B2. Public tracking search by applicant name. Return a limited summary only;
+-- the tracking token and trip details remain available only through the private token RPC.
 create or replace function public.search_travel_orders_by_name(p_name text)
 returns jsonb
 language plpgsql
@@ -387,16 +388,8 @@ begin
   select coalesce(
     jsonb_agg(
       jsonb_build_object(
-        'id', t.id,
         'reference_number', t.reference_number,
-        'tracking_token', t.tracking_token,
-        'travel_order_number', case when t.status = 'APPROVED' then t.travel_order_number else null end,
-        'signing_authority', t.signing_authority,
         'applicant_name', t.applicant_name,
-        'position', t.position,
-        'destination', t.destination,
-        'departure_date', t.departure_date,
-        'return_date', t.return_date,
         'status', t.status,
         'submission_date', t.submission_date
       )
@@ -922,6 +915,7 @@ $$;
 -- ============================================================================
 -- Table Grants (RLS enforces row-level access on all tables)
 -- ============================================================================
+revoke create on schema public from public, anon, authenticated;
 grant usage on schema public to anon, authenticated;
 
 grant select on public.app_settings to anon, authenticated;
@@ -934,6 +928,22 @@ grant select on public.audit_logs to authenticated;
 -- ============================================================================
 -- Function Execute Grants
 -- ============================================================================
+-- PostgreSQL grants EXECUTE to PUBLIC by default; remove inherited access before
+-- granting only the roles each RPC is intended to serve.
+revoke execute on function public.is_active_admin() from public, anon, authenticated;
+revoke execute on function public.submit_travel_order(text,text,text,text,date,date,text,text,text,text,text) from public, anon, authenticated;
+revoke execute on function public.get_travel_order_by_token(text) from public, anon, authenticated;
+revoke execute on function public.search_travel_orders_by_name(text) from public, anon, authenticated;
+revoke execute on function public.resubmit_corrected_travel_order(text,text,text,text,text,date,date,text,text,text,text,text) from public, anon, authenticated;
+revoke execute on function public.record_travel_order_print(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_start_review(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_verify_order(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_approve_order(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_request_correction(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_reject_order(uuid,text) from public, anon, authenticated;
+revoke execute on function public.admin_update_settings(text,text,text,text,integer,integer) from public, anon, authenticated;
+
+grant execute on function public.is_active_admin() to authenticated;
 grant execute on function public.submit_travel_order(text,text,text,text,date,date,text,text,text,text,text) to anon, authenticated;
 grant execute on function public.get_travel_order_by_token(text) to anon, authenticated;
 grant execute on function public.search_travel_orders_by_name(text) to anon, authenticated;

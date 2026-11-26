@@ -1,2 +1,6 @@
 @echo off
-npx -y @netlify/mcp@latest --site-id 6a504ec5-7026-4eea-a71d-f5693ea122a9 --proxy-path "https://mcp.netlify.com/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..8GpVp_n5tqdEN7MY.K9FgN-IzrjkEc0Ni7O2AB3d687tPgrC4mhODzZayaLIfh8TK9RHSTvTXM87S7tWD_qwUM78GWgH3TyVR1U9Y3tNEhYU-dD56JHHdd7QTzTA9qj6wun2LwCQyM8B3_N3v75c5y9tYEp0hBT8k9Lvu2eAEqujU4HP9CXg8xbxjQEOHJ6mPpSTr_gaHNSdPwJ0gywEhgZsyKGf9ruDDs682wDn-Mig1_GLvZf3HdCqvDFcg7EHFq7qsDcecd1SR0DStjJ-a5nEBzQN89y0F5LhvwRNHHK3vdUOEOOwzI_PsxBP_aZgqTaznB7g.CtCynSsHIS0cVafnlZ21lQ"
+if not defined NETLIFY_MCP_PROXY_PATH (
+  echo Set NETLIFY_MCP_PROXY_PATH to the current Netlify MCP proxy URL before running.
+  exit /b 1
+)
+npx -y @netlify/mcp@latest --site-id 6a504ec5-7026-4eea-a71d-f5693ea122a9 --proxy-path "%NETLIFY_MCP_PROXY_PATH%"

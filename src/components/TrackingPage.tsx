@@ -101,11 +101,6 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
     }
   };
 
-  const openSearchResult = (item: TravelOrderSearchResult) => {
-    window.history.pushState({}, '', `/track/${encodeURIComponent(item.tracking_token)}`);
-    void fetchOrder(item.tracking_token);
-  };
-
   useEffect(() => {
     if (initialToken) {
       setTokenInput(initialToken);
@@ -142,10 +137,6 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
       const matches = await travelOrderService.searchByName(raw);
       if (matches.length === 0) {
         setNotFound(true);
-      } else if (matches.length === 1) {
-        const only = matches[0];
-        window.history.pushState({}, '', `/track/${encodeURIComponent(only.tracking_token)}`);
-        await fetchOrder(only.tracking_token);
       } else {
         setSearchResults(matches);
       }
@@ -248,10 +239,12 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
             </div>
           )}
 
-          {searchResults.length > 1 && (
+          {searchResults.length > 0 && (
             <div className="tracked-details">
               <p className="muted" style={{ marginBottom: '10px' }}>
-                Found <strong>{searchResults.length}</strong> matching applications. Select one to view details:
+                Found <strong>{searchResults.length}</strong> matching applications. Name search shows
+                reference and status only. Use your private tracking link to view details, submit corrections,
+                or print an approved Travel Order.
               </p>
               <div className="table-scroll search-results-desktop">
                 <table className="data-table">
@@ -259,35 +252,20 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                     <tr>
                       <th>Reference #</th>
                       <th>Applicant</th>
-                      <th>Destination</th>
-                      <th>Travel Date</th>
+                      <th>Submitted</th>
                       <th>Status</th>
-                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {searchResults.map((item) => (
-                      <tr key={item.id}>
+                      <tr key={item.reference_number}>
                         <td className="mono">{item.reference_number}</td>
-                        <td>
-                          <strong>{item.applicant_name}</strong>
-                          <div className="muted-small">{item.position}</div>
-                        </td>
-                        <td>{item.destination}</td>
-                        <td>{formatDateLong(item.departure_date)}</td>
+                        <td><strong>{item.applicant_name}</strong></td>
+                        <td>{formatDateTime(item.submission_date)}</td>
                         <td>
                           <span className={statusBadgeClass(item.status)}>
                             {formatStatusLabel(item.status)}
                           </span>
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={() => openSearchResult(item)}
-                          >
-                            View
-                          </button>
                         </td>
                       </tr>
                     ))}
@@ -296,7 +274,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
               </div>
               <div className="search-results-mobile" aria-label="Matching applications">
                 {searchResults.map((item) => (
-                  <article className="search-result-card" key={item.id}>
+                  <article className="search-result-card" key={item.reference_number}>
                     <dl className="search-result-summary">
                       <div>
                         <dt>Reference #</dt>
@@ -306,16 +284,11 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                         <dt>Applicant</dt>
                         <dd>
                           <strong>{item.applicant_name}</strong>
-                          <span className="muted-small">{item.position}</span>
                         </dd>
                       </div>
                       <div>
-                        <dt>Destination</dt>
-                        <dd>{item.destination}</dd>
-                      </div>
-                      <div>
-                        <dt>Travel Date</dt>
-                        <dd>{formatDateLong(item.departure_date)}</dd>
+                        <dt>Submitted</dt>
+                        <dd>{formatDateTime(item.submission_date)}</dd>
                       </div>
                       <div>
                         <dt>Status</dt>
@@ -326,13 +299,6 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
                         </dd>
                       </div>
                     </dl>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() => openSearchResult(item)}
-                    >
-                      View Application
-                    </button>
                   </article>
                 ))}
               </div>
