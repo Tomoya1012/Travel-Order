@@ -889,6 +889,7 @@ textarea:focus {
 }
 
 .official-sheet {
+  position: relative;
   width: 215.9mm;
   max-width: 100%;
   margin: 0 auto;
@@ -899,6 +900,10 @@ textarea:focus {
   font-family: 'Times New Roman', Times, serif;
   font-size: 12pt;
   line-height: 1.2;
+}
+
+.sheet-print-note {
+  display: none;
 }
 
 /* Header */
@@ -1157,5 +1162,15 @@ textarea:focus {
     box-sizing: border-box;
     break-inside: avoid;
     page-break-after: auto;
+  }
+
+  .sheet-print-note {
+    display: block;
+    position: absolute;
+    top: 0.22in;
+    left: 0.35in;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    color: #64748b;
   }
 }

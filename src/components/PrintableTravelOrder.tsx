@@ -38,6 +38,9 @@ export function PrintableTravelOrder({
 }: PrintableTravelOrderProps) {
   return (
     <article className="official-sheet" aria-label="Official Travel Order Document">
+      <div className="sheet-print-note">
+        Online Travel Order System — Municipality of Anda, Pangasinan
+      </div>
       {/* ── Header ── */}
       <header className="sheet-header">
         {/* Left logo: Municipal Seal of Anda */}
