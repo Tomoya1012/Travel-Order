@@ -248,7 +248,7 @@ export function TrackingPage({ initialToken, onBackHome }: TrackingPageProps) {
               <p className="muted" style={{ marginBottom: '10px' }}>
                 Found <strong>{searchResults.length}</strong> matching applications. Select one to view details:
               </p>
-              <div className="table-wrapper">
+              <div className="table-scroll">
                 <table className="data-table">
                   <thead>
                     <tr>
