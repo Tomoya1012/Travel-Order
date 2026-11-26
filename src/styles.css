@@ -1110,7 +1110,7 @@ textarea:focus {
 /* Print Rules */
 @page {
   size: 8.5in 13in portrait;
-  margin: 0.65in 0.85in;
+  margin: 0;
 }
 
 @media print {
@@ -1151,9 +1151,10 @@ textarea:focus {
 
   .official-sheet {
     border: 0;
-    padding: 0;
+    padding: 0.65in 0.85in;
     width: 100%;
-    max-height: 5.5in;
+    max-height: 6.2in;
+    box-sizing: border-box;
     break-inside: avoid;
     page-break-after: auto;
   }
