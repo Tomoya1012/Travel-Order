@@ -889,30 +889,30 @@ textarea:focus {
 }
 
 .official-sheet {
-  width: 210mm;
+  width: 215.9mm;
   max-width: 100%;
   margin: 0 auto;
   background: #ffffff;
-  color: #000000;
-  padding: 14mm 18mm 16mm;
+  color: #0F243E;
+  padding: 25.4mm;
   border: 1px solid #cbd5e1;
-  font-family: 'Times New Roman', Georgia, serif;
-  font-size: 11.5pt;
-  line-height: 1.5;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 12pt;
+  line-height: 1.2;
 }
 
 /* Header */
 .sheet-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 14pt;
 }
 
 .sheet-logo-box {
-  width: 80px;
-  height: 80px;
+  width: 108px;
+  height: 104px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,106 +920,103 @@ textarea:focus {
 }
 
 .sheet-logo {
-  width: 78px;
-  height: 78px;
+  width: 106px;
+  height: 100px;
   object-fit: contain;
 }
 
 .sheet-title-block {
   text-align: center;
-  flex: 1;
+  flex: 0 1 auto;
+  padding: 0 8px;
 }
 
 .sheet-country,
 .sheet-province {
   margin: 0;
-  font-size: 11pt;
+  font-size: 12pt;
+  font-weight: 400;
+  line-height: 1.15;
+  color: #0F243E;
 }
 
 .sheet-municipality {
-  margin: 2px 0 0;
-  font-size: 13.5pt;
+  margin: 0;
+  font-size: 12pt;
   font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.sheet-office {
-  margin: 2px 0 0;
-  font-size: 10.5pt;
-  font-style: italic;
-}
-
-/* Divider line under header */
-.sheet-divider {
-  border: 0;
-  border-top: 2px solid #000000;
-  margin: 8px 0 10px;
+  line-height: 1.15;
+  color: #0F243E;
 }
 
 /* Travel Order # and Date row */
 .sheet-meta-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  margin: 10px 0 14px;
+  margin: 0 0 14pt;
 }
 
 .sheet-to-number {
-  font-size: 11.5pt;
+  font-size: 12pt;
+  color: #0F243E;
 }
 
-.sheet-label-strong {
-  font-weight: 700;
+.sheet-to-label {
+  font-weight: 400;
 }
 
 .sheet-to-value {
   text-decoration: underline;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .sheet-date-box {
-  min-width: 170px;
+  min-width: 160px;
   text-align: center;
+  color: #0F243E;
 }
 
 .sheet-date-line {
-  border-bottom: 1px solid #000000;
-  padding: 0 10px 2px;
-  min-height: 20px;
-  font-weight: 600;
+  border-bottom: 1px solid #0F243E;
+  padding: 0 8px 1px;
+  min-height: 15pt;
+  font-size: 12pt;
+  font-weight: 400;
 }
 
 .sheet-date-caption {
-  font-size: 10pt;
-  margin-top: 2px;
+  font-size: 12pt;
+  margin-top: 1pt;
 }
 
 /* Form fields */
 .sheet-fields {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 2pt;
+  margin-bottom: 28pt;
 }
 
 .sheet-field-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px;
 }
 
 .sheet-field-label {
   white-space: nowrap;
-  font-size: 11pt;
-  font-weight: 600;
-  min-width: 230px;
+  font-size: 12pt;
+  font-weight: 400;
+  color: #0F243E;
 }
 
 .sheet-field-value {
   flex: 1;
-  border-bottom: 1px solid #000000;
-  min-height: 19px;
+  border-bottom: 1px solid #0F243E;
+  min-height: 14.5pt;
   padding: 0 6px 1px;
+  font-size: 12pt;
+  color: #0F243E;
 }
 
 /* Signature block */
@@ -1027,57 +1024,63 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
-  margin-top: 20px;
+  gap: 24px;
+  margin-top: 28pt;
 }
 
 .sheet-sig-col {
-  width: 46%;
+  width: 44%;
+  color: #0F243E;
 }
 
 .sheet-sig-col--right {
+  width: 44%;
   text-align: center;
 }
 
 .sheet-sig-heading {
-  font-size: 11pt;
-  font-weight: 600;
-  margin-bottom: 32px;
+  font-size: 12pt;
+  font-weight: 400;
+  margin-bottom: 26pt;
+  text-align: left;
+  color: #0F243E;
 }
 
 .sheet-sig-space {
-  min-height: 22px;
+  min-height: 16pt;
   text-align: center;
-  font-weight: 700;
 }
 
 .sheet-dept-head-name {
   font-weight: 700;
   font-style: italic;
-  font-size: 11pt;
+  font-size: 12pt;
   text-transform: uppercase;
+  color: #0F243E;
 }
 
 .sheet-sig-underline {
-  border-top: 1px solid #000000;
+  border-top: 1px solid #0F243E;
   text-align: center;
-  padding-top: 3px;
-  font-size: 11pt;
+  padding-top: 2pt;
+  font-size: 12pt;
+  color: #0F243E;
 }
 
 .sheet-approver-name {
   font-weight: 700;
   font-style: italic;
-  font-size: 11.5pt;
+  font-size: 12pt;
   text-transform: uppercase;
+  color: #0F243E;
 }
 
-.sheet-footer-ref {
-  margin-top: 18px;
-  font-size: 8pt;
-  color: #64748b;
-  text-align: right;
-  font-family: Arial, sans-serif;
+.sheet-approver-title {
+  text-align: center;
+  padding-top: 1pt;
+  font-size: 12pt;
+  font-weight: 400;
+  color: #0F243E;
 }
 
 /* Responsive */
@@ -1106,13 +1109,15 @@ textarea:focus {
 
 /* Print Rules */
 @page {
-  size: A4 portrait;
-  margin: 10mm;
+  size: 8.5in 13in portrait;
+  margin: 1in;
 }
 
 @media print {
   body {
     background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .no-print {
@@ -1135,14 +1140,9 @@ textarea:focus {
 
   .official-sheet {
     border: 0;
-    padding: 4mm 6mm;
+    padding: 0;
     width: 100%;
     break-inside: avoid;
     page-break-after: auto;
-  }
-
-  /* Ensure the divider prints */
-  .sheet-divider {
-    border-top: 2px solid #000000 !important;
   }
 }

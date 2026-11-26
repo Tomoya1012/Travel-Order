@@ -35,7 +35,6 @@ export function PrintableTravelOrder({
   accommodationType,
   personsContacted,
   departmentHead,
-  referenceNumber,
 }: PrintableTravelOrderProps) {
   return (
     <article className="official-sheet" aria-label="Official Travel Order Document">
@@ -55,7 +54,6 @@ export function PrintableTravelOrder({
           <p className="sheet-country">Republic of the Philippines</p>
           <p className="sheet-province">Province of Pangasinan</p>
           <p className="sheet-municipality">MUNICIPALITY OF ANDA</p>
-          <p className="sheet-office">Human Resource Management Office</p>
         </div>
 
         {/* Right logo: HRMO logo */}
@@ -68,12 +66,10 @@ export function PrintableTravelOrder({
         </div>
       </header>
 
-      <hr className="sheet-divider" />
-
       {/* ── Travel Order # and Date Row ── */}
       <div className="sheet-meta-row">
         <div className="sheet-to-number">
-          <span className="sheet-label-strong">TRAVEL ORDER #:</span>{' '}
+          <span className="sheet-to-label">TRAVEL ORDER #:</span>{' '}
           <span className="sheet-to-value">{travelOrderNumber}</span>
         </div>
         <div className="sheet-date-box">
@@ -139,16 +135,9 @@ export function PrintableTravelOrder({
           <div className="sheet-sig-space">
             <div className="sheet-approver-name">{signatoryName}</div>
           </div>
-          <div className="sheet-sig-underline">{signatoryTitle}</div>
+          <div className="sheet-approver-title">{signatoryTitle}</div>
         </div>
       </footer>
-
-      {/* ── Reference footer (small, right-aligned) ── */}
-      {referenceNumber && (
-        <div className="sheet-footer-ref">
-          Online Reference: {referenceNumber}
-        </div>
-      )}
     </article>
   );
 }
