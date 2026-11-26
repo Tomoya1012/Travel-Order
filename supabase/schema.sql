@@ -204,7 +204,7 @@ create or replace function public.submit_travel_order(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_id uuid;
@@ -300,7 +300,7 @@ create or replace function public.get_travel_order_by_token(p_token text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_row public.travel_orders%rowtype;
@@ -373,7 +373,7 @@ create or replace function public.resubmit_corrected_travel_order(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_row public.travel_orders%rowtype;
