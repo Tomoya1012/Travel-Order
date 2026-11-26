@@ -906,13 +906,13 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  margin-bottom: 14pt;
+  gap: 16px;
+  margin-bottom: 10pt;
 }
 
 .sheet-logo-box {
-  width: 108px;
-  height: 104px;
+  width: 92px;
+  height: 88px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,8 +920,8 @@ textarea:focus {
 }
 
 .sheet-logo {
-  width: 106px;
-  height: 100px;
+  width: 90px;
+  height: 86px;
   object-fit: contain;
 }
 
@@ -953,7 +953,7 @@ textarea:focus {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin: 0 0 14pt;
+  margin: 0 0 10pt;
 }
 
 .sheet-to-number {
@@ -993,8 +993,8 @@ textarea:focus {
 .sheet-fields {
   display: flex;
   flex-direction: column;
-  gap: 2pt;
-  margin-bottom: 28pt;
+  gap: 1.5pt;
+  margin-bottom: 14pt;
 }
 
 .sheet-field-row {
@@ -1013,7 +1013,7 @@ textarea:focus {
 .sheet-field-value {
   flex: 1;
   border-bottom: 1px solid #0F243E;
-  min-height: 14.5pt;
+  min-height: 14pt;
   padding: 0 6px 1px;
   font-size: 12pt;
   color: #0F243E;
@@ -1025,7 +1025,7 @@ textarea:focus {
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
-  margin-top: 28pt;
+  margin-top: 12pt;
 }
 
 .sheet-sig-col {
@@ -1041,7 +1041,7 @@ textarea:focus {
 .sheet-sig-heading {
   font-size: 12pt;
   font-weight: 400;
-  margin-bottom: 26pt;
+  margin-bottom: 20pt;
   text-align: left;
   color: #0F243E;
 }
@@ -1110,14 +1110,25 @@ textarea:focus {
 /* Print Rules */
 @page {
   size: 8.5in 13in portrait;
-  margin: 1in;
+  margin: 0.65in 0.85in;
 }
 
 @media print {
+  html,
   body {
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #ffffff;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  .app-shell {
+    min-height: 0 !important;
+    height: auto !important;
+    display: block !important;
   }
 
   .no-print {
@@ -1142,6 +1153,7 @@ textarea:focus {
     border: 0;
     padding: 0;
     width: 100%;
+    max-height: 5.5in;
     break-inside: avoid;
     page-break-after: auto;
   }
