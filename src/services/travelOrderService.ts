@@ -11,6 +11,10 @@ import type {
   TravelOrderSearchResult,
 } from '../types/travelOrder';
 
+export interface NewTravelOrderNotification {
+  reference_number: string;
+}
+
 function requireClient() {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error(
@@ -161,6 +165,25 @@ export const travelOrderService = {
       .order('submission_date', { ascending: false });
     if (error) throw new Error(error.message);
     return (data as AdminTravelOrder[]) ?? [];
+  },
+
+  subscribeToNewTravelOrders(
+    onSubmission: (notification: NewTravelOrderNotification) => void,
+    onStatus?: (status: string) => void
+  ): () => void {
+    const client = requireClient();
+    const channel = client
+      .channel('admin:new-travel-order-submissions', { config: { private: true } })
+      .on('broadcast', { event: 'new_travel_order' }, ({ payload }) => {
+        const referenceNumber = payload?.reference_number;
+        if (typeof referenceNumber !== 'string' || referenceNumber.length === 0) return;
+        onSubmission({ reference_number: referenceNumber });
+      })
+      .subscribe((status) => onStatus?.(status));
+
+    return () => {
+      void client.removeChannel(channel);
+    };
   },
 
   async startReview(orderId: string, remarks?: string): Promise<AdminTravelOrder> {

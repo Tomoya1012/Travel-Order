@@ -1,0 +1,49 @@
+name: Apply Supabase Migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.jsonc'
+      - '.github/workflows/supabase-migrations.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-production-migrations
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Enable only after the current hosted schema is captured in migration history.
+    if: ${{ github.ref == 'refs/heads/main' && vars.SUPABASE_MIGRATIONS_READY == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check deployment secrets
+        shell: bash
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_DB_PASSWORD"
+          test -n "$SUPABASE_PROJECT_ID"
+
+      - name: Link Supabase project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Apply pending migrations
+        run: supabase db push --yes --remote

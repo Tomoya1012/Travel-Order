@@ -95,6 +95,33 @@ create index if not exists idx_travel_orders_status on public.travel_orders(stat
 create index if not exists idx_travel_orders_submission_date on public.travel_orders(submission_date desc);
 create index if not exists idx_travel_orders_tracking_token on public.travel_orders(tracking_token);
 
+-- Private, minimal Realtime event for new submissions. Never broadcast the
+-- tracking token or full travel-order record to the admin browser.
+create or replace function public.broadcast_new_travel_order_notification()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform realtime.send(
+    jsonb_build_object('reference_number', new.reference_number),
+    'new_travel_order',
+    'admin:new-travel-order-submissions',
+    true
+  );
+  return new;
+exception when others then
+  raise warning 'Unable to publish a new travel order notification.';
+  return new;
+end;
+$$;
+
+drop trigger if exists travel_order_submission_notification on public.travel_orders;
+create trigger travel_order_submission_notification
+after insert on public.travel_orders
+for each row execute function public.broadcast_new_travel_order_notification();
+
 -- 4. Immutable Audit Logs
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
@@ -182,6 +209,19 @@ on public.audit_logs
 for select
 to authenticated
 using (public.is_active_admin());
+
+-- Only active admins can join the private channel that carries submission
+-- reference numbers. The broadcast payload excludes all other application data.
+drop policy if exists "active_admin_receive_travel_order_notifications" on realtime.messages;
+create policy "active_admin_receive_travel_order_notifications"
+on realtime.messages
+for select
+to authenticated
+using (
+  extension = 'broadcast'
+  and (select realtime.topic()) = 'admin:new-travel-order-submissions'
+  and (select public.is_active_admin())
+);
 
 -- ============================================================================
 -- Secure RPCs
@@ -1012,6 +1052,7 @@ grant select on public.audit_logs to authenticated;
 -- PostgreSQL grants EXECUTE to PUBLIC by default; remove inherited access before
 -- granting only the roles each RPC is intended to serve.
 revoke execute on function public.is_active_admin() from public, anon, authenticated;
+revoke execute on function public.broadcast_new_travel_order_notification() from public, anon, authenticated;
 revoke execute on function public.submit_travel_order(text,text,text,text,date,date,text,text,text,text,text) from public, anon, authenticated;
 revoke execute on function public.get_travel_order_by_token(text) from public, anon, authenticated;
 revoke execute on function public.search_travel_orders_by_name(text) from public, anon, authenticated;

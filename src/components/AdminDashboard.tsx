@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
+  Bell,
   CheckCircle,
   Download,
   Eye,
@@ -40,6 +41,13 @@ interface AdminDashboardProps {
 }
 
 type AdminTab = 'applications' | 'logs' | 'settings';
+type BrowserNotificationPermission = NotificationPermission | 'unsupported';
+
+function getBrowserNotificationPermission(): BrowserNotificationPermission {
+  return typeof window !== 'undefined' && 'Notification' in window
+    ? Notification.permission
+    : 'unsupported';
+}
 
 export function AdminDashboard({
   admin,
@@ -53,6 +61,12 @@ export function AdminDashboard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [notificationPermission, setNotificationPermission] =
+    useState<BrowserNotificationPermission>(getBrowserNotificationPermission);
+  const notificationPermissionRef = useRef(notificationPermission);
+  const [liveNotificationStatus, setLiveNotificationStatus] = useState<
+    'connecting' | 'connected' | 'unavailable'
+  >('connecting');
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,6 +124,65 @@ export function AdminDashboard({
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() =>
+    travelOrderService.subscribeToNewTravelOrders(
+      ({ reference_number }) => {
+        setFeedback(`New travel order submitted: ${reference_number}.`);
+        setTab('applications');
+        setStatusFilter('PENDING_REVIEW');
+        void loadData();
+
+        if (notificationPermissionRef.current !== 'granted') return;
+
+        try {
+          const notification = new Notification('New travel order submitted', {
+            body: `Reference number: ${reference_number}`,
+            icon: '/assets/logo-hrmo.png',
+            tag: `travel-order-${reference_number}`,
+          });
+          notification.onclick = () => {
+            window.focus();
+            setTab('applications');
+            setStatusFilter('PENDING_REVIEW');
+            void loadData();
+            notification.close();
+          };
+        } catch {
+          // Keep the dashboard usable if the browser cannot display a notification.
+        }
+      },
+      (status) => {
+        setLiveNotificationStatus(status === 'SUBSCRIBED' ? 'connected' : 'unavailable');
+      }
+    ),
+  [loadData]);
+
+  const handleEnableDesktopNotifications = async () => {
+    if (!('Notification' in window)) {
+      setFeedback('This browser does not support desktop notifications.');
+      return;
+    }
+
+    if (Notification.permission !== 'default') {
+      setNotificationPermission(Notification.permission);
+      notificationPermissionRef.current = Notification.permission;
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      notificationPermissionRef.current = permission;
+      setFeedback(
+        permission === 'granted'
+          ? 'Desktop notifications are enabled for new travel orders.'
+          : 'Notifications were not enabled. Allow them for this site in Chrome site settings.'
+      );
+    } catch {
+      setFeedback('Chrome could not request notification permission. Check this site’s settings.');
+    }
+  };
 
   const counts = useMemo(() => {
     const byStatus: Record<TravelOrderStatus, number> = {
@@ -263,6 +336,36 @@ export function AdminDashboard({
             </p>
           </div>
           <div className="button-row">
+            <span className="muted" role="status" aria-live="polite">
+              {liveNotificationStatus === 'connected'
+                ? 'Live updates connected'
+                : liveNotificationStatus === 'connecting'
+                  ? 'Connecting to live updates…'
+                  : 'Live updates unavailable'}
+            </span>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => void handleEnableDesktopNotifications()}
+              disabled={notificationPermission === 'granted' || notificationPermission === 'unsupported'}
+              title={
+                notificationPermission === 'denied'
+                  ? 'Allow notifications for this site in Chrome site settings.'
+                  : undefined
+              }
+            >
+              <Bell size={15} />
+              {notificationPermission === 'granted'
+                ? 'Desktop Alerts On'
+                : notificationPermission === 'denied'
+                  ? 'Alerts Blocked'
+                  : notificationPermission === 'unsupported'
+                    ? 'Alerts Unsupported'
+                    : 'Enable Desktop Alerts'}
+            </button>
+            {notificationPermission === 'denied' && (
+              <span className="muted">Allow notifications for this site in Chrome settings.</span>
+            )}
             <button
               type="button"
               className="btn btn-outline btn-sm"
