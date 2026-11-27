@@ -18,6 +18,7 @@
 - `SECURITY DEFINER` RPCs must use a fixed `search_path`, validate input, and enforce the caller's authorization internally. Explicitly revoke default `PUBLIC` execution and grant only the intended roles.
 - Keep direct table access protected by RLS. Admin mutations belong in guarded RPCs, and audit records are written by the database functions.
 - New-submission desktop alerts use a private Supabase Realtime Broadcast channel restricted to active admins. The event may contain only the reference number; never broadcast the tracking token or full travel-order row.
+- Target numbering behavior: assign official Travel Order numbers at HR approval using the Asia/Manila calendar year. Mayor and Vice Mayor share a sequence; if the year has no numbered order yet, the first approval gets `0001-YYYY`.
 - CSV exports must continue escaping spreadsheet formula prefixes.
 - Never deploy or change hosted Supabase state unless the user explicitly requests it. SQL changes in `supabase/schema.sql` are not live until applied to the hosted project.
 - When staging future SQL in `supabase/pending_migrations/`, move it into `supabase/migrations/` only after confirming the hosted baseline, and give it a timestamp later than the latest recorded migration.
@@ -33,8 +34,9 @@
 
 - Name search remains enabled and can print approved Travel Orders without the private token; full details and correction requests still require the tracking link/token.
 - The current local mobile improvement renders name-search matches as compact cards below 640px; larger screens retain the table.
-- The admin dashboard supports Chrome desktop notifications for newly submitted applications. The live feed requires the matching notification migration to be applied to hosted Supabase.
-- The hosted production schema was captured in `supabase/migrations/20261127021044_remote_schema.sql`; `supabase migration list --remote` confirmed this baseline is recorded locally and remotely.
-- The notification SQL is in `supabase/migrations/20261127021200_admin_submission_notifications.sql`, ordered after the baseline. It has not been applied to the hosted database.
-- `.github/workflows/supabase-migrations.yml` is prepared for `main` and `SUPABASE_MIGRATIONS_READY=true` is configured. Local `npm run build` and `supabase migration list --remote` passed; changes remain uncommitted locally with no GitHub push yet.
-- Docker Desktop and WSL were installed locally to support the schema pull. If Docker/WSL reports an update is pending, restart the PC before using the CLI again.
+- The admin dashboard supports Chrome desktop notifications for newly submitted applications. The notification migration is confirmed applied to hosted Supabase.
+- The hosted production schema baseline is `supabase/migrations/20261127021044_remote_schema.sql`; the Supabase CLI confirmed it is recorded locally and remotely.
+- The notification migration `supabase/migrations/20261127021200_admin_submission_notifications.sql` is recorded as applied remotely.
+- The annual-numbering migration `supabase/migrations/20261127031700_reset_to_number_yearly_manila.sql` replaces the `admin_approve_order` RPC used by the frontend. It targets the shared yearly sequence and `0001-YYYY` on the first approval of a Manila calendar year. Verify its remote migration status before relying on the reset.
+- `.github/workflows/supabase-migrations.yml` is on `main`, and `SUPABASE_MIGRATIONS_READY=true` is configured. Keep the required GitHub Actions secrets in GitHub; never put them in the repo. Check the remote migration list after deployment.
+- Docker Desktop and WSL were installed locally, and the Supabase CLI successfully pulled the baseline.

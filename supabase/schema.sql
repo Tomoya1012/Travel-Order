@@ -806,7 +806,7 @@ declare
   v_admin public.admin_users%rowtype;
   v_settings public.app_settings%rowtype;
   v_seq integer;
-  v_year text := extract(year from now())::int::text;
+  v_year text := extract(year from (now() at time zone 'Asia/Manila'))::int::text;
   v_to_number text;
   v_sig_name text;
   v_sig_title text;
@@ -830,7 +830,15 @@ begin
   -- Mayor and Vice Mayor share one synced Travel Order sequence
   select * into v_settings from public.app_settings where id = 1 for update;
 
-  v_seq := greatest(v_settings.mayor_next_seq, v_settings.vice_mayor_next_seq);
+  if not exists (
+    select 1
+    from public.travel_orders
+    where travel_order_number like '%-' || v_year
+  ) then
+    v_seq := 1;
+  else
+    v_seq := greatest(v_settings.mayor_next_seq, v_settings.vice_mayor_next_seq);
+  end if;
 
   if v_row.signing_authority = 'MAYOR' then
     v_sig_name := v_settings.mayor_name;
