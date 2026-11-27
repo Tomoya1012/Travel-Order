@@ -5,7 +5,7 @@
 - This is the Municipality of Anda Online Travel Order System: a React, TypeScript, and Vite frontend backed by Supabase Auth and PostgreSQL.
 - `src/App.tsx` owns the home, tracking, and admin routes. Public application, tracking, and admin screens live in `src/components/`.
 - `src/services/travelOrderService.ts` is the frontend's Supabase boundary; shared models are in `src/types/travelOrder.ts`.
-- `supabase/schema.sql` is the full schema reference; incremental hosted database changes belong in `supabase/migrations/`.
+- `supabase/schema.sql` is the full schema reference; incremental hosted database changes belong in `supabase/migrations/` (applied automatically by CI on push to `main`, so manual SQL Editor pastes are not needed).
 - `.github/workflows/supabase-migrations.yml` applies migrations on `main` after the one-time baseline is recorded and the `SUPABASE_MIGRATIONS_READY` Actions variable is enabled.
 - `src/styles.css` contains responsive and print layouts. Keep name-search results readable on mobile as cards and on larger screens as a table.
 
